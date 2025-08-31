@@ -27,12 +27,16 @@ function checkRateLimit(ip) {
 }
 
 async function verifyRecaptcha(token) {
+  console.log("🔍 Starting reCAPTCHA verification...");
+  console.log("🔑 Secret key available:", !!process.env.RECAPTCHA_SECRET_KEY);
+
   if (!process.env.RECAPTCHA_SECRET_KEY) {
     console.warn("reCAPTCHA secret key not configured");
     return false;
   }
 
   try {
+    console.log("📡 Calling Google reCAPTCHA API...");
     const response = await fetch(
       "https://www.google.com/recaptcha/api/siteverify",
       {
@@ -44,23 +48,29 @@ async function verifyRecaptcha(token) {
       }
     );
 
+    console.log("📥 Google API response status:", response.status);
     const data = await response.json();
+    console.log("📋 Google API response data:", data);
 
     if (!data.success) {
-      console.error("reCAPTCHA verification failed:", data["error-codes"]);
+      console.error("❌ reCAPTCHA verification failed:", data["error-codes"]);
       return false;
     }
 
     // For v3, check the score (0.0 - 1.0, where 1.0 is very likely a human)
     if (data.score !== undefined) {
+      console.log("🎯 reCAPTCHA v3 score:", data.score);
       // Accept scores above 0.5 (you can adjust this threshold)
-      return data.score > 0.5;
+      const isValid = data.score > 0.5;
+      console.log("✅ Score validation result:", isValid);
+      return isValid;
     }
 
     // For v2, just check success
+    console.log("✅ reCAPTCHA v2 validation result:", data.success);
     return data.success;
   } catch (error) {
-    console.error("reCAPTCHA verification error:", error);
+    console.error("💥 reCAPTCHA verification error:", error);
     return false;
   }
 }
@@ -114,7 +124,12 @@ export async function POST(req) {
     }
 
     // Verify reCAPTCHA (required)
+    console.log(
+      "🔐 Verifying reCAPTCHA token:",
+      recaptchaToken ? "Present" : "Missing"
+    );
     if (!recaptchaToken) {
+      console.error("❌ No reCAPTCHA token provided");
       return Response.json(
         { success: false, message: "reCAPTCHA verification is required" },
         { status: 400 }
@@ -122,7 +137,10 @@ export async function POST(req) {
     }
 
     const isValidCaptcha = await verifyRecaptcha(recaptchaToken);
+    console.log("✅ reCAPTCHA verification result:", isValidCaptcha);
+
     if (!isValidCaptcha) {
+      console.error("❌ reCAPTCHA verification failed");
       return Response.json(
         { success: false, message: "reCAPTCHA verification failed" },
         { status: 400 }

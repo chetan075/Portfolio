@@ -22,6 +22,7 @@ export default function Contact() {
 
     // Load reCAPTCHA v3 script
     if (!window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      console.log("📜 Loading reCAPTCHA script...");
       const script = document.createElement("script");
       script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
       script.async = true;
@@ -29,37 +30,66 @@ export default function Contact() {
       document.head.appendChild(script);
 
       script.onload = () => {
+        console.log("✅ reCAPTCHA script loaded");
         if (window.grecaptcha) {
           window.grecaptcha.ready(() => {
-            console.log("reCAPTCHA v3 loaded successfully");
+            console.log("🎯 reCAPTCHA v3 ready for use");
           });
+        } else {
+          console.error("❌ grecaptcha object not found after script load");
         }
       };
+
+      script.onerror = () => {
+        console.error("❌ Failed to load reCAPTCHA script");
+      };
+    } else {
+      console.log("ℹ️ reCAPTCHA already loaded or no site key");
     }
   }, []);
 
   const executeRecaptcha = async () => {
+    console.log("🔍 executeRecaptcha called");
+    console.log("🔑 Site Key:", process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY);
+    console.log("🤖 grecaptcha available:", !!window.grecaptcha);
+
     if (window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
       try {
+        console.log("🚀 Executing reCAPTCHA...");
         const token = await window.grecaptcha.execute(
           process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
           { action: "contact_form" }
         );
+        console.log("✅ reCAPTCHA token received:", token ? "YES" : "NO");
         setRecaptchaToken(token);
         return token;
       } catch (error) {
-        console.error("reCAPTCHA execution failed:", error);
+        console.error("❌ reCAPTCHA execution failed:", error);
         return null;
       }
+    } else {
+      console.error("❌ reCAPTCHA not available:", {
+        grecaptcha: !!window.grecaptcha,
+        siteKey: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      });
+      return null;
     }
-    return null;
   };
 
   const onSubmit = async (data) => {
+    console.log("📝 Form submitted with data:", data);
+
     try {
       // Execute reCAPTCHA v3
+      console.log("🔐 Starting reCAPTCHA verification...");
       const token = await executeRecaptcha();
+      console.log(
+        "🔑 reCAPTCHA result:",
+        token ? "Token received" : "No token"
+      );
+
       if (!token) {
+        console.error("❌ reCAPTCHA verification failed - no token");
         setSubmitStatus({
           type: "error",
           message: "reCAPTCHA verification failed. Please try again.",
@@ -71,6 +101,7 @@ export default function Contact() {
         ...data,
         recaptchaToken: token,
       };
+      console.log("📤 Sending form data to API...");
 
       const response = await fetch("/api/add", {
         method: "POST",
@@ -79,9 +110,13 @@ export default function Contact() {
           "Content-Type": "application/json",
         },
       });
+
+      console.log("📥 API response status:", response.status);
       const result = await response.json();
+      console.log("📋 API response:", result);
 
       if (result.success) {
+        console.log("✅ Form submission successful");
         setSubmitStatus({
           type: "success",
           message: "Form submitted successfully!",
@@ -89,12 +124,14 @@ export default function Contact() {
         reset();
         setRecaptchaToken(null);
       } else {
+        console.error("❌ API returned error:", result.message);
         setSubmitStatus({
           type: "error",
           message: result.message || "Failed to submit form",
         });
       }
     } catch (error) {
+      console.error("💥 Form submission error:", error);
       setSubmitStatus({
         type: "error",
         message: "Network error. Please try again.",

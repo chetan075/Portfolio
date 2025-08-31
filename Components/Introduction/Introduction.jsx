@@ -113,7 +113,7 @@ const Introduction = () => {
                   <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-6">
                     <Image
                       alt="Chetan Kumawat - Full Stack Developer"
-                      src="/person2.jpg"
+                      src="/person3.jpg"
                       width={500}
                       height={600}
                       className="w-full h-auto rounded-2xl"
