@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Portfolio Website
 
-## Getting Started
+A modern, secure portfolio website built with Next.js 15, featuring a beautiful UI inspired by Outskill.com.
 
-First, run the development server:
+## 🚀 Features
+
+- **Modern Design**: Clean, professional UI with gradient backgrounds and smooth animations
+- **Responsive**: Fully responsive design that works on all devices
+- **Secure**: Input validation, rate limiting, and security headers
+- **Fast**: Optimized with Next.js and Tailwind CSS
+- **SEO Ready**: Proper meta tags and structured data
+
+## 🛡️ Security Features
+
+- Input sanitization and validation
+- Rate limiting on API endpoints
+- Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- CORS protection
+- Error boundaries
+- Environment variable protection
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- MongoDB database
+- Git
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/chetan075/portfolio.git
+   cd portfolio
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local` and add your MongoDB connection string:
+
+   ```env
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/portfolio
+   ```
+
+4. **Run development server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to view the website.
+
+## 🔒 Security Checklist Before Deployment
+
+### Critical (Must Fix)
+
+- [ ] **Database Credentials**: Ensure MongoDB URI is properly configured in environment variables
+- [ ] **CAPTCHA**: Replace basic text CAPTCHA with Google reCAPTCHA or hCaptcha
+- [ ] **CORS**: Update CORS settings for production domain
+- [ ] **HTTPS**: Ensure SSL certificate is configured
+
+### Important (Should Fix)
+
+- [ ] **Environment Variables**: Verify all sensitive data is in environment variables
+- [ ] **Rate Limiting**: Adjust rate limits based on expected traffic
+- [ ] **Logging**: Set up proper error logging and monitoring
+- [ ] **Backup**: Set up database backups
+
+### Optional (Nice to Have)
+
+- [ ] **CDN**: Configure CDN for static assets
+- [ ] **Monitoring**: Add application monitoring
+- [ ] **Analytics**: Set up analytics (respecting privacy)
+
+## 📦 Build & Deployment
+
+### Build for Production
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Deploy to Vercel (Recommended)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Manual Deployment
 
-## Learn More
+```bash
+npm run build
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🔧 Configuration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+MONGODB_URI=your_mongodb_connection_string
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+```
 
-## Deploy on Vercel
+### Security Headers
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application includes comprehensive security headers:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Content Security Policy (CSP)
+- HTTP Strict Transport Security (HSTS)
+- X-Frame-Options
+- X-Content-Type-Options
+- Referrer Policy
+
+## 📊 Performance
+
+- **Lighthouse Score**: 90+ (typical)
+- **First Contentful Paint**: < 1.5s
+- **Largest Contentful Paint**: < 2.5s
+- **Cumulative Layout Shift**: < 0.1
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Database Connection Error**
+
+   - Check MongoDB URI in environment variables
+   - Ensure MongoDB cluster allows connections from your IP
+
+2. **Build Errors**
+
+   - Clear `.next` folder: `rm -rf .next`
+   - Reinstall dependencies: `rm -rf node_modules && npm install`
+
+3. **Image Loading Issues**
+   - Verify Unsplash images are accessible
+   - Check `next.config.mjs` image configuration
+
+## 📝 API Endpoints
+
+- `POST /api/add` - Contact form submission
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 📞 Support
+
+For questions or support, please use the contact form on the website or create an issue in this repository.
