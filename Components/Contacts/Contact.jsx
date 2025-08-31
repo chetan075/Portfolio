@@ -1,8 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useState, useEffect, useRef } from "react";
 
 export default function Contact() {
   const {
@@ -15,22 +14,62 @@ export default function Contact() {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [isClient, setIsClient] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [recaptchaRef, setRecaptchaRef] = useState(null);
+  const recaptchaRef = useRef(null);
 
   // Prevent hydration mismatch by only rendering on client
   useEffect(() => {
     setIsClient(true);
+
+    // Load reCAPTCHA v3 script
+    if (!window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        if (window.grecaptcha) {
+          window.grecaptcha.ready(() => {
+            console.log("reCAPTCHA v3 loaded successfully");
+          });
+        }
+      };
+    }
   }, []);
 
-  const onRecaptchaChange = (token) => {
-    setRecaptchaToken(token);
+  const executeRecaptcha = async () => {
+    if (window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      try {
+        const token = await window.grecaptcha.execute(
+          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+          { action: "contact_form" }
+        );
+        setRecaptchaToken(token);
+        return token;
+      } catch (error) {
+        console.error("reCAPTCHA execution failed:", error);
+        return null;
+      }
+    }
+    return null;
   };
 
   const onSubmit = async (data) => {
     try {
+      // Execute reCAPTCHA v3
+      const token = await executeRecaptcha();
+      if (!token) {
+        setSubmitStatus({
+          type: "error",
+          message: "reCAPTCHA verification failed. Please try again.",
+        });
+        return;
+      }
+
       const formData = {
         ...data,
-        recaptchaToken: recaptchaToken,
+        recaptchaToken: token,
       };
 
       const response = await fetch("/api/add", {
@@ -48,11 +87,7 @@ export default function Contact() {
           message: "Form submitted successfully!",
         });
         reset();
-        // Reset reCAPTCHA
-        if (recaptchaRef) {
-          recaptchaRef.reset();
-          setRecaptchaToken(null);
-        }
+        setRecaptchaToken(null);
       } else {
         setSubmitStatus({
           type: "error",
@@ -397,25 +432,10 @@ export default function Contact() {
                 )}
               </div>
 
-              {/* reCAPTCHA */}
-              {isClient && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-                <div className="flex justify-center">
-                  <ReCAPTCHA
-                    ref={(ref) => setRecaptchaRef(ref)}
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                    onChange={onRecaptchaChange}
-                    theme="dark"
-                    size="normal"
-                    onExpired={() => setRecaptchaToken(null)}
-                    onError={() => setRecaptchaToken(null)}
-                  />
-                </div>
-              )}
-
               {/* Submit button */}
               <button
                 type="submit"
-                disabled={isSubmitting || !recaptchaToken}
+                disabled={isSubmitting}
                 className="w-full group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <span className="relative z-10">

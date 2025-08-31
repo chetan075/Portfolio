@@ -48,8 +48,16 @@ async function verifyRecaptcha(token) {
 
     if (!data.success) {
       console.error("reCAPTCHA verification failed:", data["error-codes"]);
+      return false;
     }
 
+    // For v3, check the score (0.0 - 1.0, where 1.0 is very likely a human)
+    if (data.score !== undefined) {
+      // Accept scores above 0.5 (you can adjust this threshold)
+      return data.score > 0.5;
+    }
+
+    // For v2, just check success
     return data.success;
   } catch (error) {
     console.error("reCAPTCHA verification error:", error);
